@@ -416,6 +416,11 @@ iptables -A INPUT -p tcp --dport 80 -m time --timestart 11:00 --timestop 13:00 -
 iptables -A INPUT -p tcp --dport 80 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT
 iptables -A INPUT -p tcp --dport 80 -j REJECT
 ```
+Penjelasan:
+- `iptables -A INPUT -p tcp --dport 80 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT` : Mengatur akses pada hari Jumat pada jam 11.00 - 13.00 dilarang
+- `iptables -A INPUT -p tcp --dport 80 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT` : Mengatur akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang
+- `iptables -A INPUT -p tcp --dport 80 -j REJECT` : Mengatur akses pada hari lainnya dilarang
+
 ### Testing
 
 
@@ -429,6 +434,13 @@ iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -j DNAT --to-destin
 iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.0.6
 iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -j DNAT --to-destination 10.46.4.2
 ```
+
+Penjelasan:
+- `iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.4.2` : Mengatur akses pada port 80 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan
+- `iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -j DNAT --to-destination 10.46.0.6` : Mengatur akses pada port 80 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan
+- `iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.0.6` : Mengatur akses pada port 443 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan
+- `iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -j DNAT --to-destination 10.46.4.2` : Mengatur akses pada port 443 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan
+
 ### Testing
 
 ## Soal 8
@@ -444,6 +456,13 @@ Pemilu_End=$(date -d "2024-02-15T00:00" +"%Y-%m-%dT%H:%M")
 
 iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pemilu_Start" --datestop "$Pemilu_End" -j DROP
 ```
+
+Penjelasan:
+- `Revolte_Subnet="10.46.0.16/30"` : Mengatur subnet yang akan di drop
+- `Pemilu_Start=$(date -d "2023-12-19T00:00" +"%Y-%m-%dT%H:%M")` : Mengatur waktu awal pemilu
+- `Pemilu_End=$(date -d "2024-02-15T00:00" +"%Y-%m-%dT%H:%M")` : Mengatur waktu akhir pemilu
+- `iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pemilu_Start" --datestop "$Pemilu_End" -j DROP` : Mengatur akses pada subnet yang akan di drop
+
 ### Testing
 
 ## Soal 9
@@ -460,6 +479,15 @@ iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount
 iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
 iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 ```
+
+Penjelasan:
+- `iptables -F` : Menghapus semua rule yang ada
+- `iptables -N scan_port` : Membuat chain baru dengan nama scan_port
+- `iptables -A INPUT -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP` : Mengatur akses pada input yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit
+- `iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP` : Mengatur akses pada forward yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit
+- `iptables -A INPUT -m recent --name scan_port --set -j ACCEPT` : Mengatur akses pada input yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit
+- `iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT` : Mengatur akses pada forward yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit
+
 ### Testing
 
 ## Soal 10
@@ -469,6 +497,14 @@ iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 ```sh
 iptables -A INPUT -j LOG --log-level debug --log-prefix "Dropped:"
 ```
+
+Penjelasan:
+- `iptables -A INPUT -j LOG --log-level debug --log-prefix "Dropped:"` : Mengatur log pada input
+- `-A INPUT` : Menambahkan aturan ke rantai INPUT, yang mengatur paket-paket yang masuk ke sistem.
+- `-j LOG` : Mengarahkan paket yang memenuhi aturan ini ke target LOG. Ini berarti informasi tentang paket-paket tersebut akan dicatat dalam log sistem.
+- `--log-level debug` : Menentukan tingkat log yang diinginkan. Dalam contoh ini, tingkat log ditetapkan sebagai "debug".
+- `--log-prefix "Dropped:"` : Menentukan awalan pesan log yang akan ditambahkan ke setiap catatan log yang dihasilkan oleh aturan ini. Dalam contoh ini, awalan "Dropped: " akan ditambahkan ke setiap catatan log.
+
 ### Testing
 
 
