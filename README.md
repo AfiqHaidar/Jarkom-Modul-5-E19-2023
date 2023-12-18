@@ -40,6 +40,21 @@ iface eth2 inet static
 
 - Frieren
 ```sh
+auto eth0
+iface eth0 inet static
+	address 10.46.0.2
+	netmask 255.255.255.252
+
+auto eth1
+iface eth1 inet static
+	address 10.46.0.9
+	netmask 255.255.255.252
+
+auto eth2
+iface eth2 inet static
+	address 10.46.0.5
+	netmask 255.255.255.252
+
 
 ```
 
