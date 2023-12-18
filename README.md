@@ -411,21 +411,39 @@ iptables -A INPUT -j REJECT
 > Lalu, karena ternyata terdapat beberapa waktu di mana network administrator dari WebServer tidak bisa stand by, sehingga perlu ditambahkan rule bahwa akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang (istirahat maksi cuy) dan akses di hari Jumat pada jam 11.00 - 13.00 juga dilarang (maklum, Jumatan rek).
 
 ### Konfigurasi
-
+```sh
+iptables -A INPUT -p tcp --dport 80 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT
+iptables -A INPUT -p tcp --dport 80 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT
+iptables -A INPUT -p tcp --dport 80 -j REJECT
+```
 ### Testing
+
 
 ## Soal 7
 > Karena terdapat 2 WebServer, kalian diminta agar setiap client yang mengakses Sein dengan Port 80 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan dan request dari client yang mengakses Stark dengan port 443 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan.
 
 ### Konfigurasi
-
+```sh
+iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.4.2
+iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -j DNAT --to-destination 10.46.0.6
+iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.0.6
+iptables -A PREROUTING -t nat -p tcp --dport 443 -d 10.46.0.6 -j DNAT --to-destination 10.46.4.2
+```
 ### Testing
 
 ## Soal 8
 > Karena berbeda koalisi politik, maka subnet dengan masyarakat yang berada pada Revolte dilarang keras mengakses WebServer hingga masa pencoblosan pemilu kepala suku 2024 berakhir. Masa pemilu (hingga pemungutan dan penghitungan suara selesai) kepala suku bersamaan dengan masa pemilu Presiden dan Wakil Presiden Indonesia 2024.
 
 ### Konfigurasi
+```sh	
+Revolte_Subnet="10.46.0.16/30"
 
+Pemilu_Start=$(date -d "2023-12-19T00:00" +"%Y-%m-%dT%H:%M")
+
+Pemilu_End=$(date -d "2024-02-15T00:00" +"%Y-%m-%dT%H:%M")
+
+iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pemilu_Start" --datestop "$Pemilu_End" -j DROP
+```
 ### Testing
 
 ## Soal 9
@@ -433,14 +451,24 @@ iptables -A INPUT -j REJECT
 (clue: test dengan nmap)
 
 ### Konfigurasi
+```sh
+iptables -F
 
+iptables -N scan_port
+iptables -A INPUT -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
+iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
+```
 ### Testing
 
 ## Soal 10
 > Karena kepala suku ingin tau paket apa saja yang di-drop, maka di setiap node server dan router ditambahkan logging paket yang di-drop dengan standard syslog level
 
 ### Konfigurasi
-
+```sh
+iptables -A INPUT -j LOG --log-level debug --log-prefix "Dropped:"
+```
 ### Testing
 
 
