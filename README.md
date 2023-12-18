@@ -11,6 +11,8 @@ Laporan Resmi Praktikum Modul 3 Kelompok E19
 
 ## Pembagian IP
 
+Link pembagian IP https://docs.google.com/spreadsheets/d/1MzAeYkjxnVSKTdKhH7W2RDOhKYu6OOIyPag1VWNo4Js/edit?usp=sharing
+
 ![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/911b6a00-11f4-4fe5-8caa-ea7122ec6189)
 
 ## VLSM Tree
@@ -302,6 +304,10 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source "$IPETH0" -s 10.46.0.
 
 ### Testing
 
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/8a708d97-40ad-4e65-9a49-33b9de8f20bf)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/8bc6b53a-3eac-4dab-84af-77d5e76508bf)
+
 ## Soal 2
 > Kalian diminta untuk melakukan drop semua TCP dan UDP kecuali port 8080 pada TCP.
 
@@ -317,6 +323,14 @@ iptables -A INPUT -p udp -j DROP
 
 ### Testing
 
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/c63aeffd-8ab0-4fa9-b3fc-35ef419e0b8a)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/7511edf3-2e8d-4f65-b080-acdaa8222377)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/03e6cf42-8318-4fb2-8701-d1d78ddbed45)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/d450bea3-1aa1-4654-a2b0-72b94484e576)
+
 ## Soal 3
 > Kepala Suku North Area meminta kalian untuk membatasi DHCP dan DNS Server hanya dapat dilakukan ping oleh maksimal 3 device secara bersamaan, selebihnya akan di drop.
 
@@ -326,6 +340,14 @@ iptables -A INPUT -p icmp -m connlimit --connlimit-above 3 --connlimit-mask 0 -j
 ```
 
 ### Testing
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/89e5cf27-9b25-4d96-91d5-e299efd2020a)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/43c3bf31-5497-400c-b336-6b504adf7f26)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/37773a4f-52a9-4e29-93e9-e33c8edd580c)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/de004e0e-8eec-4a88-afe7-bc2d33dd7bdb)
 
 ## Soal 4
 > Lakukan pembatasan sehingga koneksi SSH pada Web Server hanya dapat dilakukan oleh masyarakat yang berada pada GrobeForest
@@ -338,15 +360,37 @@ sudo iptables -A INPUT --dport 22 -j DROP
 
 ### Testing
 
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/b9e9d653-e4e5-4770-9ef3-c8d5268142c7)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/de7b193e-10ab-4368-b6dc-5b5c02218d31)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/e8671856-61c5-4c83-b0ab-ce22c72a1e8e)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/2caf0444-0dd9-489c-9eab-540c75c23c52)
+
+
+
+
+
 ## Soal 5 
 > Selain itu, akses menuju WebServer hanya diperbolehkan saat jam kerja yaitu Senin-Jumat pada pukul 08.00-16.00.
 
 ### Sein & Stark - Web Server
 ```sh
 iptables -A INPUT -m time --timestart 08:00 --timestop 16:00 --days Mon,Tue,Wed,Thu,Fri -j ACCEPT
+iptables -A INPUT -j REJECT
 ```
 
 ### Testing
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/941c0f0b-ce2a-4d7b-bdf2-c0ab8bd81884)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/164704e3-3ccd-4ad8-a4a6-12015704d30b)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/269dac78-5ebd-4950-8376-d0fc091ae208)
+
+![image](https://github.com/AfiqHaidar/Jarkom-Modul-5-E19-2023/assets/70834506/7baa3a95-0d73-4424-bbef-1e1c7bd9eb55)
+
 
 ## Soal 6
 > Lalu, karena ternyata terdapat beberapa waktu di mana network administrator dari WebServer tidak bisa stand by, sehingga perlu ditambahkan rule bahwa akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang (istirahat maksi cuy) dan akses di hari Jumat pada jam 11.00 - 13.00 juga dilarang (maklum, Jumatan rek).
