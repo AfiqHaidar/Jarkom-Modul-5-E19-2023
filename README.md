@@ -410,24 +410,34 @@ iptables -A INPUT -j REJECT
 ## Soal 6
 > Lalu, karena ternyata terdapat beberapa waktu di mana network administrator dari WebServer tidak bisa stand by, sehingga perlu ditambahkan rule bahwa akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang (istirahat maksi cuy) dan akses di hari Jumat pada jam 11.00 - 13.00 juga dilarang (maklum, Jumatan rek).
 
-### Konfigurasi
+### Sein & Stark - Web Server
 ```sh
-iptables -A INPUT -p tcp --dport 80 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT
-iptables -A INPUT -p tcp --dport 80 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT
-iptables -A INPUT -p tcp --dport 80 -j REJECT
+iptables -A INPUT -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT
+iptables -A INPUT -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT
+iptables -A INPUT -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT
+iptables -A INPUT -j REJECT
 ```
 Penjelasan:
-- `iptables -A INPUT -p tcp --dport 80 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT` : Mengatur akses pada hari Jumat pada jam 11.00 - 13.00 dilarang
-- `iptables -A INPUT -p tcp --dport 80 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT` : Mengatur akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang
-- `iptables -A INPUT -p tcp --dport 80 -j REJECT` : Mengatur akses pada hari lainnya dilarang
+- `iptables -A INPUT -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j REJECT` : Mengatur akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang
+- `iptables -A INPUT -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j REJECT` : Mengatur akses di hari Jumat pada jam 11.00 - 13.00 juga dilarang
+- `iptables -A INPUT -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT` : Mengatur akses pada hari Senin - Jumat pada jam 08.00 - 16.00 diperbolehkan
+- `iptables -A INPUT -j REJECT` : Mengatur akses pada hari selain Senin - Jumat pada jam selain 08.00 - 16.00 dilarang
 
 ### Testing
 
+- Testing jam kerja
+```date -u 1214133023```
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/c3b2ee80-30b8-4ace-8013-c6cc371cab91)
+
+- Testing jam istirahat
+```date -u 1214123023```
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/b7e38b36-3183-4a10-b5c3-402ecd031bcc)
 
 ## Soal 7
 > Karena terdapat 2 WebServer, kalian diminta agar setiap client yang mengakses Sein dengan Port 80 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan dan request dari client yang mengakses Stark dengan port 443 akan didistribusikan secara bergantian pada Sein dan Stark secara berurutan.
 
-### Konfigurasi
+### Heiter
 ```sh
 iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 10.46.4.2
 iptables -A PREROUTING -t nat -p tcp --dport 80 -d 10.46.4.2 -j DNAT --to-destination 10.46.0.6
@@ -443,16 +453,45 @@ Penjelasan:
 
 ### Testing
 
+- Gunakan syntaxs berikut pada sein dan stark
+```sh
+# untuk port 80
+Sein :
+while true; do nc -l -p 80 -c 'echo "Halo, ini sein"'; done 
+Stark :
+while true; do nc -l -p 80 -c 'echo "Halo, ini stark"'; done
+
+# untuk port 443
+Sein :
+while true; do nc -l -p 443 -c 'echo "Halo, ini sein"'; done
+while true; do nc -l -p 443 -c 'echo "Halo, ini stark"'; done
+```
+
+- Gunakan syntaxs berikut pada client
+```sh
+# untuk port 80
+nc 10.46.4.2 80 
+
+# untuk port 443
+nc 10.46.0.6 443
+```
+- Hasil
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/61392fef-d278-4f26-94bb-fb88d96151bf)
+
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/f50647c3-f36a-43d0-b3bc-cf609ca37730)
+
+
 ## Soal 8
 > Karena berbeda koalisi politik, maka subnet dengan masyarakat yang berada pada Revolte dilarang keras mengakses WebServer hingga masa pencoblosan pemilu kepala suku 2024 berakhir. Masa pemilu (hingga pemungutan dan penghitungan suara selesai) kepala suku bersamaan dengan masa pemilu Presiden dan Wakil Presiden Indonesia 2024.
 
-### Konfigurasi
+### Sein & Stark - Web Server
 ```sh	
 Revolte_Subnet="10.46.0.16/30"
 
 Pemilu_Start=$(date -d "2023-12-19T00:00" +"%Y-%m-%dT%H:%M")
 
-Pemilu_End=$(date -d "2024-02-15T00:00" +"%Y-%m-%dT%H:%M")
+Pemilu_End=$(date -d "2024-03-15T00:00" +"%Y-%m-%dT%H:%M")
 
 iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pemilu_Start" --datestop "$Pemilu_End" -j DROP
 ```
@@ -460,16 +499,23 @@ iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pem
 Penjelasan:
 - `Revolte_Subnet="10.46.0.16/30"` : Mengatur subnet yang akan di drop
 - `Pemilu_Start=$(date -d "2023-12-19T00:00" +"%Y-%m-%dT%H:%M")` : Mengatur waktu awal pemilu
-- `Pemilu_End=$(date -d "2024-02-15T00:00" +"%Y-%m-%dT%H:%M")` : Mengatur waktu akhir pemilu
+- `Pemilu_End=$(date -d "2024-03-15T00:00" +"%Y-%m-%dT%H:%M")` : Mengatur waktu akhir pemilu
 - `iptables -A INPUT -p tcp -s $Revolte_Subnet --dport 80 -m time --datestart "$Pemilu_Start" --datestop "$Pemilu_End" -j DROP` : Mengatur akses pada subnet yang akan di drop
 
 ### Testing
+```sh
+date -u 0110120024
+nmap 10.46.4.2 80 #pada Revolte & GrobeForest
+```
+- Hasil
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/5f81f8a4-4ba8-404f-9e22-1a0d89079ea4)
 
 ## Soal 9
 > Sadar akan adanya potensial saling serang antar kubu politik, maka WebServer harus dapat secara otomatis memblokir  alamat IP yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit. 
 (clue: test dengan nmap)
 
-### Konfigurasi
+### Sein & Stark - Web Server
 ```sh
 iptables -F
 
@@ -489,13 +535,20 @@ Penjelasan:
 - `iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT` : Mengatur akses pada forward yang melakukan scanning port dalam jumlah banyak (maksimal 20 scan port) di dalam selang waktu 10 menit
 
 ### Testing
+> Lakukan Ping ke Sein atau Stark
+
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/9767a863-4b28-4258-924a-836cea68c808)
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/d427922f-776e-448c-a0e5-0fe8b9aa8cd4)
+
 
 ## Soal 10
 > Karena kepala suku ingin tau paket apa saja yang di-drop, maka di setiap node server dan router ditambahkan logging paket yang di-drop dengan standard syslog level
 
-### Konfigurasi
+### Sein & Stark - Web Server
 ```sh
-iptables -A INPUT -j LOG --log-level debug --log-prefix "Dropped:"
+iptables -A INPUT -j LOG --log-level debug --log-prefix "Packet Dropped:"
 ```
 
 Penjelasan:
@@ -506,7 +559,14 @@ Penjelasan:
 - `--log-prefix "Dropped:"` : Menentukan awalan pesan log yang akan ditambahkan ke setiap catatan log yang dihasilkan oleh aturan ini. Dalam contoh ini, awalan "Dropped: " akan ditambahkan ke setiap catatan log.
 
 ### Testing
+> Jalankan syntaxs berikut pada sein atau stark
+```sh
+iptables -L
+```
 
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/bcbdfe35-6974-4f60-9497-ae95cafad9f0)
+
+![image](https://github.com/VanGarman21/PBKK/assets/100523471/c902092e-fd23-45b1-983f-acd5bcd8377f)
 
 
 
