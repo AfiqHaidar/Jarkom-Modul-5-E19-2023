@@ -552,11 +552,11 @@ iptables -A INPUT -j LOG --log-level debug --log-prefix "Packet Dropped:"
 ```
 
 Penjelasan:
-- `iptables -A INPUT -j LOG --log-level debug --log-prefix "Dropped:"` : Mengatur log pada input
+- `iptables -A INPUT -j LOG --log-level debug --log-prefix "Packet Dropped:"` : Mengatur log pada input
 - `-A INPUT` : Menambahkan aturan ke rantai INPUT, yang mengatur paket-paket yang masuk ke sistem.
 - `-j LOG` : Mengarahkan paket yang memenuhi aturan ini ke target LOG. Ini berarti informasi tentang paket-paket tersebut akan dicatat dalam log sistem.
 - `--log-level debug` : Menentukan tingkat log yang diinginkan. Dalam contoh ini, tingkat log ditetapkan sebagai "debug".
-- `--log-prefix "Dropped:"` : Menentukan awalan pesan log yang akan ditambahkan ke setiap catatan log yang dihasilkan oleh aturan ini. Dalam contoh ini, awalan "Dropped: " akan ditambahkan ke setiap catatan log.
+- `--log-prefix "Packet Dropped:"` : Menentukan awalan pesan log yang akan ditambahkan ke setiap catatan log yang dihasilkan oleh aturan ini. Dalam contoh ini, awalan "Packet Dropped: " akan ditambahkan ke setiap catatan log.
 
 ### Testing
 > Jalankan syntaxs berikut pada sein atau stark
